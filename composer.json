@@ -1,0 +1,41 @@
+{
+  "name": "mf-team/yii2-beorg-api",
+  "description": "API для beorg.ru",
+  "type": "yii2-extension",
+  "version": "dev-master",
+  "keywords": [
+    "yii2",
+    "api",
+    "beorg"
+  ],
+  "authors": [
+    {
+      "name": "Mikhail Glazkov",
+      "email": "miha.o.g@ya.ru"
+    }
+  ],
+  "require": {
+    "php": ">=7.2.0",
+    "yiisoft/yii2": "~2.0.13",
+    "yiisoft/yii2-httpclient": "~2.0.0"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-latest"
+  },
+  "autoload": {
+    "psr-4": {
+      "mfteam\\beorg\\": "src/"
+    }
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://asset-packagist.org"
+    }
+  ],
+  "config": {
+    "allow-plugins": {
+      "yiisoft/yii2-composer": true
+    }
+  }
+}
