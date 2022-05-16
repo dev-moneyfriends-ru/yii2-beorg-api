@@ -149,7 +149,9 @@ class ApiClient extends Component
      */
     private function getRequest(): Request
     {
-        return (new Client())
+        return (new Client([
+            'baseUrl' => $this->host
+        ]))
             ->createRequest()
             ->addHeaders([
                 'Content-Type' => 'application/json',
