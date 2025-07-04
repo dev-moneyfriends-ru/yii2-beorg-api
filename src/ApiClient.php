@@ -103,10 +103,10 @@ class ApiClient extends Component
         }
         $response = $request->setMethod('POST')
             ->setData($date)
-            ->setUrl('/api/bescan/add_questionary')
+            ->setUrl('/api/bescan/add_document')
             ->send();
         if ($response->isOk) {
-            return $response->data['questionary_id'];
+            return $response->data['document_id'];
         }
         $this->parseError($response);
     }
