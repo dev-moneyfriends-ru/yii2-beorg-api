@@ -9,6 +9,7 @@ use mfteam\beorg\exceptions\InProgressException;
 use mfteam\beorg\exceptions\NotFoundException;
 use mfteam\beorg\exceptions\QuestionaryAlreadyExistsException;
 use mfteam\beorg\models\QuestionaryResult;
+use mfteam\beorg\models\RequestFile;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
@@ -41,6 +42,8 @@ class ApiClient extends Component
      * @var string ключ для аутентификации
      */
     public $machineUid;
+
+    protected $files = [];
     
     /**
      * @param string $token
@@ -71,10 +74,9 @@ class ApiClient extends Component
         $this->machineUid = $machineUid;
         return $this;
     }
-    
+
     /**
      * Отправка запроса на распознавание документа
-     * @param string $content Изображение в виде строки, кодированной в base64
      * @return string
      * @throws AccessDeniedException
      * @throws BadRequestException
@@ -85,16 +87,22 @@ class ApiClient extends Component
      * @throws \yii\base\Exception
      * @throws \yii\httpclient\Exception
      */
-    public function send(string $content): string
+    public function send(): string
     {
         $request = $this->getRequest();
+        $date = [
+            'project_id' => $this->campaignId,
+            'token' => $this->token,
+            'machine_uid' => $this->machineUid,
+            'images' => [],
+            'process_info' => []
+        ];
+        foreach ($this->files as $file) {
+            $date['images'][] = $file->getContent();
+            $date['process_info'][] = $file->getProcessInfo();
+        }
         $response = $request->setMethod('POST')
-            ->setData([
-                'campaign_id' => $this->campaignId,
-                'scan' => $content,
-                'token' => $this->token,
-                'machine_uid' => $this->machineUid,
-            ])
+            ->setData($date)
             ->setUrl('/api/bescan/add_questionary')
             ->send();
         if ($response->isOk) {
@@ -102,9 +110,9 @@ class ApiClient extends Component
         }
         $this->parseError($response);
     }
-    
+
     /**
-     * @param $filePath
+     * @param RequestFile $file
      * @return string
      * @throws AccessDeniedException
      * @throws BadRequestException
@@ -115,13 +123,10 @@ class ApiClient extends Component
      * @throws \yii\base\Exception
      * @throws \yii\httpclient\Exception
      */
-    public function sendFile($filePath): string
+    public function sendFile(RequestFile $file): string
     {
-        if(!file_exists($filePath)){
-            throw new \yii\base\Exception('File not found: ' . $filePath);
-        }
-        $content = file_get_contents($filePath);
-        return $this->send(base64_encode($content));
+        $this->setFiles([$file]);
+        return $this->send();
     }
     
     /**
@@ -217,5 +222,25 @@ class ApiClient extends Component
         }
         
         throw $exception;
+    }
+
+    public function getFiles(): array
+    {
+        return $this->files;
+    }
+
+    public function setFiles(array $files): ApiClient
+    {
+        $this->files = [];
+        foreach ($files as $file) {
+            $this->addFile($file);
+        }
+        return $this;
+    }
+
+    public function addFile(RequestFile $file): ApiClient
+    {
+        $this->files[] = $file;
+        return $this;
     }
 }
