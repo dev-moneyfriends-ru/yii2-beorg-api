@@ -8,6 +8,7 @@ use mfteam\beorg\exceptions\BadRequestException;
 use mfteam\beorg\exceptions\InProgressException;
 use mfteam\beorg\exceptions\NotFoundException;
 use mfteam\beorg\exceptions\QuestionaryAlreadyExistsException;
+use mfteam\beorg\models\BeorgResult;
 use mfteam\beorg\models\QuestionaryResult;
 use mfteam\beorg\models\RequestFile;
 use yii\base\Component;
@@ -131,19 +132,19 @@ class ApiClient extends Component
     
     /**
      * @param string $questionaryId
-     * @return QuestionaryResult
+     * @return BeorgResult
      * @throws InvalidConfigException
      * @throws \yii\httpclient\Exception
      * @throws Exception
      */
-    public function result(string $questionaryId): QuestionaryResult
+    public function result(string $documentId): BeorgResult
     {
         $request = $this->getRequest();
         $response = $request->setMethod('GET')
-            ->setUrl('/api/document/result/' . $questionaryId . '?token=' . $this->token)
+            ->setUrl('/api/document/result/' . $documentId . '?token=' . $this->token)
             ->send();
         if ($response->isOk) {
-            return new QuestionaryResult($response->data);
+            return new BeorgResult($response->data);
         }
         $this->parseError($response);
     }
